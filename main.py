@@ -78,10 +78,17 @@ def rentAGame(db: list):
         if (option == "1"):
             game = searchByModel(
                 db, input("Ingrese el modelo del juego \n -->"))
-
-            print(game)
+            q=input("seguro que quiere alquilar" + {game["titulo"]} + "?\n 1. si\n 2.no\n introduzca su seleccion:")
+            if q=="1":
+                game["status"]="ALQUILADO"
+                print({game["titulo"]} + "ha sido alquilado con exito")
         elif option == "2":
-            pass
+            game= searchByTitle(
+                db,input("Ingrese el titulo del juego \n -->") )
+            q=input("seguro que quiere alquilar" + {game["titulo"]} + "?\n 1. si\n 2.no\n introduzca su seleccion:")
+            if q=="1":
+                game["status"]="ALQUILADO"
+                print({game["titulo"]} + "ha sido alquilado con exito")
         elif option == "3":
             break
         else:
