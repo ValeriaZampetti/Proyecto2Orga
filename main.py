@@ -1,10 +1,90 @@
-from module1 import agregarJuego
-from module3 import rentAGame
-from txtModule import readDatabase
 
+def codigoUnico(db: list, modelo: str) -> bool:
+    for juego in db:
+        if juego["modelo"] == modelo:
+            return False
+    return True
+
+def agregar_juego(db: list):
+    #print("Agregar un juego")
+    titulo = input("Ingrese el nombre del juego \n -->")
+
+    while len(titulo) > 10:
+        titulo = input("Ingrese el nombre del juego otra vez \n -->")
+
+    modelo = input("Ingrese el modelo (Formato = AAAAAA00) \n -->")
+
+    while (
+            not modelo[:6].isalpha() or
+            not modelo[6:].isnumeric() or
+            len(modelo) != 8 or
+            not codigoUnico(db, modelo)
+    ):
+        modelo = input(
+            "Ingrese el modelo otra vez (Formato = AAAAAA00) \n -->")
+
+    precio = input("Ingrese el precio del juego \n -->")
+    
+    while (
+        not precio.isnumeric() or
+        int(precio) <= 0 or
+        int(precio) > 999
+    ):
+        precio = input("Ingrese el precio del juego otra vez \n -->")
+
+    db.append(
+        {
+            "titulo": titulo,
+            "modelo": modelo,
+            "precio": int(precio),
+            "status": "EN STOCK"
+        }
+    )
+    print("Juego agregado correctamente")
+
+def searchByModel(db: list, model: str) -> dict:
+    for game in db:
+        if game["modelo"] == model:
+            return game
+    return {}
+
+
+def searchByTitle(db: list, title: str) -> dict:
+    for game in db:
+        if game["titulo"] == title:
+            return game
+    return {}
+
+def rentAGame(db: list):
+    while True:
+        print(f"""
+        ===========Rentar un juego============
+
+        1. Buscar por Modelo.
+        2. Buscar por Titulo.
+        3. Regresar al menu principal.
+
+        =================================
+        """)
+
+        option = input("Ingrese la opción a realizar \n -->")
+
+        game = {}
+        if (option == "1"):
+            game = searchByModel(
+                db, input("Ingrese el modelo del juego \n -->"))
+
+            print(game)
+        elif option == "2":
+            pass
+        elif option == "3":
+            break
+        else:
+            print("Ingreso incorrecto, vuelvalo a intentar.")
 
 def main():
-    db = readDatabase()
+    
+    db = [ ]
     while True:
         print(f"""
         ===========Rent-A-Game============
@@ -21,7 +101,7 @@ def main():
 
         option = input("Ingrese la opción a realizar \n -->")
         if (option == "1"):
-            agregarJuego(db)
+            agregar_juego(db)
         elif option == "2":
             pass
         elif option == "3":

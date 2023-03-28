@@ -1,16 +1,13 @@
-import json
+from main import *
 
+# Create a txt file
+def createDataBase():
+    with open("database.txt", "w") as file:
+        file.write("")
+        print("File created")
 
-def writeDatabase(db: list):
-    with open("database.json", "w") as file:
-        json.dump(db, file, indent=4)
-        print("Database saved")
-
-
-def readDatabase() -> list:
-    with open("database.json") as file:
-        if file.read() == "":
-            return []
-        db = json.loads(file)
-        print(db)
-    return db
+# Read the txt file and return a list
+def readDataBase():
+    with open("database.txt", "r") as file:
+        data = file.readlines()
+        return data 
