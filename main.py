@@ -45,14 +45,19 @@ def agregar_juego(db: list):
 def searchByModel(db: list, model: str) -> dict:
     for game in db:
         if game["modelo"] == model:
-            return game
+            if game["status"]== "EN STOCK":    
+                return game
+            else:
+                print("Ese juego ya esta alquilado")
     return {}
-
 
 def searchByTitle(db: list, title: str) -> dict:
     for game in db:
         if game["titulo"] == title:
-            return game
+            if game["status"]== "EN STOCK":
+                return game
+            else:
+                print("Ese juego ya esta alquilado")
     return {}
 
 def rentAGame(db: list):
@@ -92,8 +97,18 @@ def eliminar_juego(db: list):
             return
     print("No se encontro el juego")
 
-def main():
-    
+def devolver_juego(db: list):
+        print("Devolver un juego")
+        modelo= input("ingrese el modelo del juego \n -->")
+        for juego in db:
+            if juego["modelo"]== modelo:
+                if juego["status"]=="ALQUILADO":
+                    juego["status"]== "EN STOCK"
+                    print("juego devuelto exitosamente")
+                    return    
+        print("ese juego no se encuentra alquilado")
+        
+def main():    
     db = [ ]
     while True:
         print(f"""
@@ -117,7 +132,7 @@ def main():
         elif option == "3":
             rentAGame(db)
         elif option == "4":
-            pass
+            devolver_juego(db)
         elif option == "5":
             eliminar_juego(db)
         elif option == "6":
