@@ -82,6 +82,16 @@ def rentAGame(db: list):
         else:
             print("Ingreso incorrecto, vuelvalo a intentar.")
 
+def eliminar_juego(db: list):
+    print("Eliminar un juego")
+    modelo = input("Ingrese el modelo del juego \n -->")
+    for juego in db:
+        if juego["modelo"] == modelo:
+            db.remove(juego)
+            print("Juego eliminado correctamente")
+            return
+    print("No se encontro el juego")
+
 def main():
     
     db = [ ]
@@ -109,7 +119,7 @@ def main():
         elif option == "4":
             pass
         elif option == "5":
-            pass
+            eliminar_juego(db)
         elif option == "6":
             break
         else:
