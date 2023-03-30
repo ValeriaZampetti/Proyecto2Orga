@@ -1,12 +1,12 @@
 
-def hash(titulo):
+def hash(modelo):
     suma = 0
-    for i in titulo:   
+    for i in modelo:
         suma += ord(i)
-        div = suma%3
+    div = suma % 3
 
     return div
-    
+
 
 def codigoUnico(db: list, modelo: str) -> bool:
     for juego in db:
@@ -16,7 +16,10 @@ def codigoUnico(db: list, modelo: str) -> bool:
 
 
 def mostrar_juego(game):
-        print(f'''
+    if game == {}:
+        print("Ese juego no existe o ya esta alquilado")
+        return
+    print(f'''
     ================ {game["titulo"]} ===================
 
     Modelo --> {game["modelo"]}  
@@ -29,12 +32,20 @@ def mostrar_juego(game):
         ''')
 
 
-def agregar_juego(db: list):
-    
+def titulo_unico(db, titulo):
+    for juego in db:
+        if juego["titulo"] == titulo:
+            return False
+    return True
+
+
+def agregar_juego(db: list, buckets: list, overflows: list, index: dict):
+
     titulo = input("Ingrese el nombre del juego \n -->").upper()
 
-    while len(titulo) > 10:
-        titulo = input("Ingrese el nombre del juego otra vez (SOLO MAXIMO 10 CARACTERES) \n -->").upper()
+    while len(titulo) > 10 or not titulo_unico(db, titulo):
+        titulo = input(
+            "Ingrese el nombre del juego otra vez (SOLO MAXIMO 10 CARACTERES) \n -->").upper()
 
     modelo = input("Ingrese el modelo (Formato = AAAAAA00) \n -->").upper()
 
@@ -44,50 +55,82 @@ def agregar_juego(db: list):
             len(modelo) != 8 or
             not codigoUnico(db, modelo)
     ):
+
         modelo = input(
             "Ingrese el modelo otra vez (Formato = AAAAAA00) \n -->").upper()
 
-    precio = input("Ingrese el precio del juego (Monto ENTERO hasta 999bs) \n -->")
-    
+    precio = input(
+        "Ingrese el precio del juego (Monto ENTERO hasta 999bs) \n -->")
+
     while (
         not precio.isnumeric() or
         int(precio) <= 0 or
         int(precio) > 999
     ):
-        precio = input("Ingrese el precio del juego otra vez (Monto ENTERO hasta 999bs) \n -->")
+        precio = input(
+            "Ingrese el precio del juego otra vez (Monto ENTERO hasta 999bs) \n -->")
 
-    hash_code = hash(titulo)     
+    hash_code = hash(modelo)
+    game = {
+        "titulo": titulo,
+        "modelo": modelo,
+        "precio": int(precio),
+        "status": "EN STOCK",
+        "hash": hash_code
+    }
 
     db.append(
-        {
-            "titulo": titulo,
-            "modelo": modelo,
-            "precio": int(precio),
-            "status": "EN STOCK",
-            "hash": hash_code
-        }
-    )
+        game)
+
+    index[titulo] = game
+
+    bucket_actual = buckets[hash_code]
+    if len(bucket_actual) < 3:
+        bucket_actual.append(game)
+    else:
+        i = 0
+        group_overflow = overflows[hash_code]
+
+        while len(group_overflow[i]) >= 3:
+            i += 1
+            if i >= len(group_overflow):
+                print("No hay espacio en el overflow")
+                return
+        overflow = group_overflow[i]
+        overflow.append(game)
+
     print("Juego agregado correctamente")
 
 
-def searchByModel(db: list, model: str) -> dict:
-    for game in db:
-        if game["modelo"] == model:
+def searchByModel(db: list, modelo: str, overflows: list, buckets: list) -> dict:
+    hash_code = hash(modelo)
+    bucket_actual = buckets[hash_code]
+
+    for game in bucket_actual:
+        if game["modelo"] == modelo:
             if game["status"] == "EN STOCK":
                 return game
             else:
                 print("Ese juego ya esta alquilado")
+                return {}
+
+    for overflow in overflows[hash_code]:
+        for game in overflow:
+            if game["modelo"] == modelo:
+                if game["status"] == "EN STOCK":
+                    return game
+                else:
+                    print("Ese juego ya esta alquilado")
+                    return {}
     return {}
 
 
-def searchByTitle(db: list, title: str) -> dict:
-    for game in db:
-        if game["titulo"] == title:
-            if game["status"] == "EN STOCK":
-                return game
-            else:
-                print("Ese juego ya esta alquilado")
-    return {}
+def searchByTitle(db: list, title: str, index: dict) -> dict:
+    game = index.get(title)
+
+    if game is None:
+        return {}
+    return game
 
 
 def writeDataBase(db: list):
@@ -97,7 +140,7 @@ def writeDataBase(db: list):
                 f"{game['titulo']},{game['modelo']},{game['precio']},{game['status']}")
 
 
-def BuscarJuego(db: list):
+def BuscarJuego(db: list, buckets: list, overflows: list, index: dict):
     while True:
         print(f"""
         ===========Buscar un juego============
@@ -113,17 +156,20 @@ def BuscarJuego(db: list):
 
         game = {}
         if (option == "1"):
-            game = searchByModel(db, input("Ingrese el modelo del juego \n -->"))
+            game = searchByModel(
+                db, input("Ingrese el modelo del juego \n -->"), overflows, buckets)
             mostrar_juego(game)
-        elif option == "2" :
-            game = searchByTitle(db, input("Ingrese el titulo del juego \n -->"))
+        elif option == "2":
+            game = searchByTitle(
+                db, input("Ingrese el titulo del juego \n -->"), index)
             mostrar_juego(game)
         elif option == "3":
             break
         else:
             print("Ingreso incorrecto, vuelvalo a intentar.")
 
-def rentAGame(db: list):
+
+def rentAGame(db: list, buckets: list, overflows: list, index: dict):
     while True:
         print(f"""
         ===========Rentar un juego============
@@ -139,15 +185,18 @@ def rentAGame(db: list):
 
         game = {}
         if (option == "1"):
-            game = searchByModel(db, input("Ingrese el modelo del juego \n -->"))
+            game = searchByModel(
+                db, input("Ingrese el modelo del juego \n -->"), overflows, buckets)
 
             while game == {}:
                 print("Ese juego no existe o ya esta alquilado")
-                game = searchByModel(db, input("Ingrese el modelo del juego otra vez \n -->"))
+                game = searchByModel(
+                    db, input("Ingrese el modelo del juego otra vez \n -->"), overflows, buckets)
 
             titulo = game["titulo"]
 
-            q = input(f"Seguro que desea alquilar {titulo} por un precio de {game['precio']}Bs ?\n 1. SI\n 2. NO\n introduzca su seleccion:")
+            q = input(
+                f"Seguro que desea alquilar {titulo} por un precio de {game['precio']}Bs ?\n 1. SI\n 2. NO\n introduzca su seleccion:")
             if q == "1":
                 game["status"] = "ALQUILADO"
                 print(f"{titulo} ha sido alquilado con exito")
@@ -173,7 +222,7 @@ def rentAGame(db: list):
             print("Ingreso incorrecto, vuelvalo a intentar.")
 
 
-def eliminar_juego(db: list):
+def eliminar_juego(db: list, buckets: list, overflows: list, index: dict):
     modelo = input("Ingrese el modelo del juego \n -->")
     for juego in db:
         if juego["modelo"] == modelo:
@@ -183,7 +232,7 @@ def eliminar_juego(db: list):
     print("No se encontro el juego!")
 
 
-def devolver_juego(db: list):
+def devolver_juego(db: list, buckets: list, overflows: list, index: dict):
     modelo = input("Ingrese el modelo del juego \n -->")
     for juego in db:
         if juego["modelo"] == modelo:
@@ -195,13 +244,12 @@ def devolver_juego(db: list):
 
 
 def main():
+
     db = []
-    bucket0 = []
-    bucket1 = []
-    bucket2 = []
-    overflow0 = []
-    overflow1 = []
-    overflow2 = []
+    buckets = [[], [], []]
+    overflows = [[[], []], [[], []], [[], []]]
+    index = {}
+
     while True:
         print(f"""
         ===========Rent-A-Game============
@@ -218,15 +266,15 @@ def main():
 
         option = input("Ingrese la opción a realizar \n -->")
         if (option == "1"):
-            agregar_juego(db)
+            agregar_juego(db, buckets, overflows, index)
         elif option == "2":
-            BuscarJuego(db)
+            BuscarJuego(db, buckets, overflows, index)
         elif option == "3":
-            rentAGame(db)
+            rentAGame(db, buckets, overflows, index)
         elif option == "4":
-            devolver_juego(db)
+            devolver_juego(db, buckets, overflows, index)
         elif option == "5":
-            eliminar_juego(db)
+            eliminar_juego(db, buckets, overflows, index)
         elif option == "6":
             break
         else:
