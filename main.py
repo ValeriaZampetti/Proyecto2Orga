@@ -203,16 +203,16 @@ def rentAGame(db: list, buckets: list, overflows: list, index: dict):
 
         elif option == "2":
             game = searchByTitle(
-                db, input("Ingrese el titulo del juego \n -->"))
+                db, input("Ingrese el titulo del juego \n -->").upper(), index)
 
             while game == {}:
                 print("Ese juego no existe o ya esta alquilado")
                 game = searchByTitle(
-                    db, input("Ingrese el titulo del juego otra vez \n -->"))
+                    db, input("Ingrese el titulo del juego otra vez \n -->")).upper()
 
             titulo = game["titulo"]
             q = input(
-                f"seguro que quiere alquilar {titulo} ?\n 1.Si\n 2.No\n Introduzca su seleccion:")
+                f"seguro que quiere alquilar {titulo} ?\n 1.Si\n 2.No\n Introduzca su seleccion: ")
             if q == "1":
                 game["status"] = "ALQUILADO"
                 print(f"{titulo} ha sido alquilado con exito")
@@ -270,7 +270,7 @@ def main():
         elif option == "2":
             BuscarJuego(db, buckets, overflows, index)
         elif option == "3":
-            rentAGame(db, buckets, overflows, index)
+            rentAGame(db, buckets, overflows,index)
         elif option == "4":
             devolver_juego(db, buckets, overflows, index)
         elif option == "5":
