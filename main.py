@@ -149,7 +149,7 @@ def BuscarJuego(db: list, buckets: list, overflows: list, index: dict):
         2. Buscar por Titulo.
         3. Regresar al menu principal.
 
-        =================================
+        ======================================
         """)
 
         option = input("Ingrese la opción a realizar \n -->")
@@ -157,11 +157,11 @@ def BuscarJuego(db: list, buckets: list, overflows: list, index: dict):
         game = {}
         if (option == "1"):
             game = searchByModel(
-                db, input("Ingrese el modelo del juego \n -->"), overflows, buckets)
+                db, input("Ingrese el modelo del juego \n -->").upper(), overflows, buckets)
             mostrar_juego(game)
         elif option == "2":
             game = searchByTitle(
-                db, input("Ingrese el titulo del juego \n -->"), index)
+                db, input("Ingrese el titulo del juego \n -->").upper(), index)
             mostrar_juego(game)
         elif option == "3":
             break
@@ -186,12 +186,12 @@ def rentAGame(db: list, buckets: list, overflows: list, index: dict):
         game = {}
         if (option == "1"):
             game = searchByModel(
-                db, input("Ingrese el modelo del juego \n -->"), overflows, buckets)
+                db, input("Ingrese el modelo del juego \n -->").upper(), overflows, buckets)
 
             while game == {}:
                 print("Ese juego no existe o ya esta alquilado")
                 game = searchByModel(
-                    db, input("Ingrese el modelo del juego otra vez \n -->"), overflows, buckets)
+                    db, input("Ingrese el modelo del juego otra vez \n -->").upper(), overflows, buckets)
 
             titulo = game["titulo"]
 
@@ -223,7 +223,7 @@ def rentAGame(db: list, buckets: list, overflows: list, index: dict):
 
 
 def eliminar_juego(db: list, buckets: list, overflows: list, index: dict):
-    modelo = input("Ingrese el modelo del juego \n -->")
+    modelo = input("Ingrese el modelo del juego \n -->").upper()
     for juego in db:
         if juego["modelo"] == modelo:
             db.remove(juego)
@@ -233,7 +233,7 @@ def eliminar_juego(db: list, buckets: list, overflows: list, index: dict):
 
 
 def devolver_juego(db: list, buckets: list, overflows: list, index: dict):
-    modelo = input("Ingrese el modelo del juego \n -->")
+    modelo = input("Ingrese el modelo del juego \n -->").upper()
     for juego in db:
         if juego["modelo"] == modelo:
             if juego["status"] == "ALQUILADO":
@@ -276,6 +276,7 @@ def main():
         elif option == "5":
             eliminar_juego(db, buckets, overflows, index)
         elif option == "6":
+            print("Saliendo del sistema...")
             break
         else:
             print("Ingreso incorrecto, vuelvalo a intentar.")
